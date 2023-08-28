@@ -1,24 +1,13 @@
 import path, { join } from "path";
-import fs, { copy, emptyDir, ensureDir, writeJSON } from "fs-extra";
-import { getTransformedRoutes } from "@vercel/routing-utils";
+import fs, { emptyDir, ensureDir, writeJSON } from "fs-extra";
 import { existsSync } from "fs";
 
-async function createStaticFile(
-  html: string,
-  options: {
-    outdir?: string;
-    fileName?: string;
-    bundle?: boolean;
-  } = { bundle: true },
-) {
-  const outdir = options?.outdir || join(".vercel/output/static");
-
+async function createStaticFile(html: string) {
+  const randomString = Math.random().toString(36).substring(7);
+  const outdir = join(`.vercel/output/static/${randomString}/`);
   await fs.ensureDir(outdir);
 
-  return fs.writeFileSync(
-    path.join(outdir, options?.fileName || `index.html`),
-    html,
-  );
+  return fs.writeFileSync(path.join(outdir, `index.html`), html);
 }
 
 async function prepareFileSystem() {
