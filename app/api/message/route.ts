@@ -1,6 +1,7 @@
 import altogic from "@/utils/altogic";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { deploy } from "@/utils/deploy";
 
 export async function PUT(req: Request) {
   const cookieStore = cookies();
@@ -22,6 +23,8 @@ export async function PUT(req: Request) {
   });
 
   const { data, errors } = await altogic.endpoint.put("/message-content", body);
+
+  await deploy(body.result);
 
   if (errors) return NextResponse.json({ errors }, { status: 500 });
   return NextResponse.json({ message: data }, { status: 200 });

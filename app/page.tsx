@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import useSearchParams from "@/hooks/useSearchParams";
 import altogic from "@/utils/altogic";
 import RateModal from "@/components/RateModal";
+import { deploy } from "@/utils/deploy";
 
 enum DeviceSize {
   Mobile = "w-1/2",
