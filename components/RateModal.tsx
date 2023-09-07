@@ -9,14 +9,14 @@ import LoadingSpinner from "@/components/loadingSpinner";
 
 export default function RateModal({ show }: { show: boolean }) {
   const { deleteByKey, has } = useSearchParams();
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(5);
   const [ratingText, setRatingText] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   function close() {
     deleteByKey("rateModal");
-    setRating(0);
+    setRating(5);
     setRatingText("");
   }
 

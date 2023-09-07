@@ -9,6 +9,14 @@ import { useAuth } from "@/context/AuthContext";
 import useSearchParams from "@/hooks/useSearchParams";
 import RateModal from "@/components/RateModal";
 import { cn, updateProject } from "@/utils/helpers";
+import {
+  replacedHTML,
+  html,
+  predefinedColors,
+  predefinedColorsSecondary,
+} from "@/constants";
+import { JSONResponse } from "@/types";
+import LoadingSpinner from "@/components/loadingSpinner";
 
 enum DeviceSize {
   Mobile = "w-1/2",
@@ -17,6 +25,14 @@ enum DeviceSize {
 }
 
 export default function Chat() {
+  const [htmlContent, setHtmlContent] = useState(html);
+  const [isColorModalOpen, setIsColorModalOpen] = useState(false);
+  const [primaryColor, setPrimaryColor] = useState(predefinedColors[0]);
+  const [secondaryColor, setSecondaryColor] = useState(
+    predefinedColorsSecondary[0],
+  );
+  const [font, setFont] = useState("Inter");
+  const [layout, setLayout] = useState("Single Column");
   const { user, setUser } = useAuth();
   const [lastMessageId, setLastMessageId] = useState<string | null>(null);
   const [hasNoCreditsError, setHasNoCreditsError] = useState(false);
@@ -25,6 +41,7 @@ export default function Chat() {
   const { messages, input, handleInputChange, handleSubmit, isLoading, stop } =
     useChat({
       onResponse: (message) => {
+        setHtmlContent(html);
         setHasNoCreditsError(false);
         setLastMessageId(null);
         decreaseCredit();
@@ -37,8 +54,34 @@ export default function Chat() {
         } catch {
           await saveResult(message.content);
         }
+        setHtmlContent(
+          replacedHTML(
+            html,
+            JSON.parse(message.content) as unknown as JSONResponse,
+          ),
+        );
       },
     });
+
+  const handleColorModalToggle = () => {
+    setIsColorModalOpen((prevState) => !prevState);
+  };
+
+  const handlePrimaryColorChange = (color: any) => {
+    setPrimaryColor(color);
+  };
+
+  const handleSecondaryColorChange = (color: any) => {
+    setSecondaryColor(color);
+  };
+
+  const handleFontChange = (font: any) => {
+    setFont(font);
+  };
+
+  const handleLayoutChange = (layout: any) => {
+    setLayout(layout);
+  };
 
   function decreaseCredit(by: number = 1) {
     if (user) {
@@ -314,11 +357,72 @@ export default function Chat() {
               readOnly={!user}
               disabled={isLoading}
             />
-            {isLoading ? null : (
-              <p className="text-xs ml-4 font-medium text-gray-500">
-                <b>Tip:</b> A landing page for Medical website
-              </p>
-            )}
+            <div className="flex justify-between">
+              {isLoading ? null : (
+                <p className="text-xs ml-4 font-medium text-gray-500">
+                  <b>Tip:</b> A landing page for Medical website
+                </p>
+              )}
+              {/*
+              <div className="pr-4">
+                <ColorPickerModal
+                  onPrimaryColorChange={handlePrimaryColorChange}
+                  onSecondaryColorChange={handleSecondaryColorChange}
+                  onFontChange={handleFontChange}
+                  onLayoutChange={handleLayoutChange}
+                  primaryColor={primaryColor}
+                  secondaryColor={secondaryColor}
+                  font={font}
+                  layout={layout}
+                >
+                  <button
+                    type="button"
+                    className="text-gray-500 focus:outline-none"
+                    onClick={handleColorModalToggle}
+                  >
+                    <div className="flex gap-2 items-center">
+                      {layout && (
+                        <div
+                          id="layout"
+                          className={cn(
+                            "h-6 w-auto rounded-md",
+                            "shadow-inner border-inner border border-slate-300",
+                            "cursor-pointer flex items-center justify-between px-3",
+                          )}
+                        >
+                          <span className="text-xs font-medium">{layout}</span>
+                        </div>
+                      )}
+                      {font && (
+                        <div
+                          className={cn(
+                            "h-6 w-auto rounded-md shadow-inner border-inner border border-slate-300 cursor-pointer flex items-center justify-between px-3",
+                          )}
+                          style={{
+                            fontFamily: font,
+                          }}
+                        >
+                          <span className="text-xs font-medium">{font}</span>
+                        </div>
+                      )}
+                      {primaryColor && (
+                        <div
+                          className={`h-6 w-6 rounded-lg shadow-inner`}
+                          style={{ backgroundColor: primaryColor.code }}
+                        />
+                      )}
+                      {secondaryColor && (
+                        <div
+                          className={`h-6 w-6 rounded-lg shadow-inner`}
+                          style={{ backgroundColor: secondaryColor.code }}
+                        />
+                      )}
+                    </div>
+                  </button>
+                </ColorPickerModal>
+              </div>
+              */}
+            </div>
           </form>
         </div>
 
@@ -359,6 +463,8 @@ export default function Chat() {
               Please try again tomorrow.
             </p>
           </div>
+        ) : isLoading ? (
+          <LoadingSpinner />
         ) : (
           iframeContent && (
             <div className="flex flex-col items-center py-4 w-full">
@@ -445,19 +551,17 @@ export default function Chat() {
                   </div>
                 </div>
                 <div className="border bg-white rounded-b-xl border-t-0 h-[calc(100vh-100px)] overflow-auto">
-                  <Frame
-                    ref={iframeRef}
-                    sandbox="allow-same-origin allow-scripts"
-                    className="w-full h-full"
-                  >
-                    {codeViewActive ? (
-                      <pre>{iframeContent}</pre>
-                    ) : (
-                      <div
-                        dangerouslySetInnerHTML={{ __html: iframeContent }}
-                      />
-                    )}
-                  </Frame>
+                  {codeViewActive && <pre>{htmlContent}</pre>}
+                  {!codeViewActive && (
+                    <Frame
+                      ref={iframeRef}
+                      sandbox="allow-same-origin allow-scripts"
+                      className="w-full h-full"
+                      initialContent={htmlContent}
+                    >
+                      <></>
+                    </Frame>
+                  )}
                 </div>
               </div>
             </div>

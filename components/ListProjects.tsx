@@ -4,8 +4,7 @@ import Link from "next/link";
 import Badge, { BadgeVariant } from "@/components/Badge";
 import { Project } from "@/types";
 import ProjectIcon from "@/components/ProjectIcon";
-import { useEffect } from "react";
-import useProjectList from "@/hooks/useProjectList";
+import useProjectList, { SetProjects } from "@/hooks/useProjectList";
 import useProject from "@/hooks/useProject";
 
 const mails = [
@@ -23,18 +22,14 @@ interface ListProjectsProps {
 export default function ListProjects({ projects }: ListProjectsProps) {
   const { user } = useAuth();
   const { setProject } = useProject();
-  const setProjects = useProjectList((state) => state.setProjects);
   const _projects = useProjectList((state) => state.projects);
 
   const hasPermission = mails.includes(user?.email as string);
   const Component = hasPermission ? Link : "div";
 
-  useEffect(() => {
-    setProjects(projects ?? []);
-  }, []);
-
   return (
     <>
+      <SetProjects projects={projects ?? []} />
       {_projects?.map((project) => (
         <Component
           key={project._id}
@@ -102,8 +97,10 @@ export default function ListProjects({ projects }: ListProjectsProps) {
                 <line x1={6} x2={6} y1={20} y2={14} />
               </svg>
               <h2 className="whitespace-nowrap text-sm">
-                {project.click ?? 0}
-                {project.click > 1 ? " clicks" : " click"}
+                {project.integrations?.length ?? 0}
+                {project.integrations?.length > 1
+                  ? " integration"
+                  : " integrations"}
               </h2>
             </div>
           </div>

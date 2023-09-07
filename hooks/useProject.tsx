@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { Domain, Project } from "@/types";
+import { Domain, Integration, Project } from "@/types";
 import { useEffect } from "react";
 import useProjectList from "@/hooks/useProjectList";
 
@@ -11,6 +11,7 @@ interface ProjectStore {
   setProject: (project: Project | null) => void;
   addDomain: (domain: Domain) => void;
   removeDomain: (id: string) => void;
+  addIntegration: (integration: Integration) => void;
 }
 
 const useProject = create<ProjectStore>()(
@@ -42,6 +43,16 @@ const useProject = create<ProjectStore>()(
           const project = {
             ...prev.project,
             domains: prev.project.domains.filter((d) => d._id !== id),
+          };
+          return { project };
+        });
+      },
+      addIntegration: (integration) => {
+        set((prev) => {
+          if (!prev.project) return prev;
+          const project = {
+            ...prev.project,
+            integrations: [...prev.project.integrations, integration],
           };
           return { project };
         });

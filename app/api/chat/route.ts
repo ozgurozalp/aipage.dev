@@ -73,28 +73,33 @@ export async function POST(req: Request) {
     return NextResponse.json({ code: "no-credits", credits });
   }
 
-  const systemPrompt = `You are a talented UI designer who needs help creating a clear and concise HTML UI using Tailwind CSS. The UI should be visually appealing and responsive. Please design a UI component that includes the following elements:
+  const systemPrompt = `You are a talented UI designer who specializes in creating structured content for landing pages. Your task is to generate a JSON object that outlines the content for each section of a landing page. The JSON object should be organized as follows:
 
-1. A header Section: Include a logo and a navigation menu.
-2. A hero Section: Create a captivating headline and a call-to-action button. Use a random image related to the prompt for the background image, generating it with the URL "https://source.unsplash.com/featured/1280x720/?{description}" (replace {description} with a relevant keyword).
-3. A feature Section: Showcase three standout feature cards with eye-catching featured icons from the Fontawesome CDN icon library. Apply subtle CSS animations, such as fade-in or slide-in effects using Animate.css, to enhance visual appeal.
-4. An individual Feature Sections: Create a separate section for each feature card. Each section should include a captivating title, description, and a call-to-action button. Use a random image related to the prompt for the background image, generating it with the URL "https://source.unsplash.com/featured/1280x720/?{description}" (replace {description} with a relevant keyword). You can float the image to the left or right of the text.
-5. A testimonial Section: Display two testimonials with names, roles, and feedback. Apply a CSS animation, like fade-in or slide-in animation using Animate.css, to reveal testimonials when scrolled into view.
-6. A blog Section: Include a section that displays recent blog posts with a title, short description, and a "Read More" link.
-7. An FAQ Section: Add a section for frequently asked questions and answers.
-8. A Team Section: Showcase the team with photos, names, roles, and social media links.
-9. A Newsletter Subscription: Add a section for users to subscribe to a newsletter.
-10. A Contact Form: Create fields for name, email, and message. Apply appropriate CSS animations or transitions using jQuery for smooth interactivity.
-11. A map Section: Include a Google Maps section with a marker showing the location of the business (you may need a Google Maps API key).
-12. A footer Section: Add links to social media profiles, utilizing the Fontawesome CDN icon library for social media icons.
+1. Header Section: Create a JSON object named "header" with keys for "logo" and "navigationMenuItems" (an array of menu items).
 
-Please ensure the HTML code is valid and properly structured, incorporating the necessary CDN links for Tailwind CSS, Fontawesome icons, jQuery, Animate.css, Google Maps API, and any additional CSS or JS files.
+2. Hero Section: Create a JSON object named "hero" with keys for "title", "description", "jumbotron" (background image description), and "cta" (call-to-action text).
 
-Remember to keep the design minimalistic, intuitive, and visually appealing. Your attention to detail is highly appreciated. Once you complete the design, provide the HTML code for the UI component. The code should be valid HTML, formatted for readability, and include the necessary CDN links for Tailwind CSS, icons, and any additional libraries used for data visualization.
+3. Feature Section: Create a JSON object named "features" with keys for "feature_1", "feature_2", and "feature_3". Each feature should be a nested object with keys for "title", "icon", and "description".
 
-  Given the prompt, generate the only HTML code for the UI component. The code should be valid HTML and include the necessary CDN links for Tailwind CSS, Fontawesome icons, and any additional CSS and JavaScript files.
+4. Individual Feature Sections: Create a JSON object named "individualFeatures" with keys for "feature_1", "feature_2", and "feature_3". Each feature should be a nested object with keys for "title", "description", "cta", and "backgroundImageDescription".
 
-  Start with <!DOCTYPE html> and end with </html>. The code should be formatted for readability.`;
+5. Testimonial Section: Create a JSON object named "testimonials" with keys for "testimonial_1" and "testimonial_2". Each testimonial should be a nested object with keys for "name", "role", and "feedback".
+
+6. Blog Section: Create a JSON object named "blog" with keys for "post_1", "post_2", and "post_3". Each post should be a nested object with keys for "title" and "shortDescription".
+
+7. FAQ Section: Create a JSON object named "faq" with keys for "question_1", "question_2", etc. Each question should be a nested object with keys for "question" and "answer".
+
+8. Team Section: Create a JSON object named "team" with keys for "member_1", "member_2", "member_3", etc. Each member should be a nested object with keys for "name", "role", and "socialMediaLinks" (an array of social media platforms).
+
+9. Newsletter Subscription: Create a JSON object named "newsletter" with keys for "title" and "cta".
+
+10. Contact Form: Create a JSON object named "contactForm" with keys for "nameField", "emailField", and "messageField".
+
+11. Map Section: Create a JSON object named "map" with keys for "locationDescription" and "googleMapsAPIKey".
+
+12. Footer Section: Create a JSON object named "footer" with keys for "socialMediaLinks" (an array of social media platforms).
+
+Please ensure that each key-value pair contains only text. Format the JSON object for readability.`;
 
   const combinedMessages = [
     ...messages,

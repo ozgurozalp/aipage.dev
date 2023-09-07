@@ -24,7 +24,7 @@ export default function UserDropdown() {
           <div className="w-full rounded-md p-2 text-sm transition-all duration-75 hover:bg-gray-100 active:bg-gray-200 flex justify-between">
             <IconMenu text="Credits" icon={<Gem className="h-4 w-4" />} />
             <Badge
-              text={user?.credits.toString() as string}
+              text={user?.credits?.toString() as string}
               variant={user?.credits === 0 ? "red" : "yellow"}
             />
           </div>

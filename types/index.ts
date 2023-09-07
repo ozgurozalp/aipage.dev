@@ -44,6 +44,7 @@ export interface Project {
   updatedAt: string;
   click: number;
   domains: Domain[];
+  integrations: Integration[];
 }
 
 export interface Domain {
@@ -56,6 +57,20 @@ export interface Domain {
   status: DomainVerificationStatusProps;
   domain: string;
 }
+
+export interface Integration {
+  _id: string;
+  updatedAt: string;
+  createdAt: string;
+  _parent: string;
+  name: string;
+  token: string;
+  type: IntegrationType;
+  status: IntegrationStatus;
+}
+
+export type IntegrationStatus = "active" | "inactive";
+export type IntegrationType = "maps" | "analytics";
 
 export interface Invoice {
   id: string;
@@ -136,4 +151,121 @@ export interface DomainInfo {
     value: string;
     reason: string;
   }[];
+}
+
+export interface JSONResponse {
+  header: Header;
+  hero: Hero;
+  features: Features;
+  individualFeatures: IndividualFeatures;
+  testimonials: Testimonials;
+  blog: Blog;
+  faq: FAQ;
+  team: Team;
+  newsletter: Newsletter;
+  contactForm: ContactForm;
+  map: Map;
+  footer: Footer;
+}
+
+export interface Blog {
+  post_1: Post;
+  post_2: Post;
+  post_3: Post;
+}
+
+export interface Post {
+  title: string;
+  shortDescription: string;
+}
+
+export interface ContactForm {
+  nameField: string;
+  emailField: string;
+  messageField: string;
+}
+
+export interface FAQ {
+  question_1: Question;
+  question_2: Question;
+  question_3: Question;
+}
+
+export interface Question {
+  question: string;
+  answer: string;
+}
+
+export interface Features {
+  feature_1: FeaturesFeature;
+  feature_2: FeaturesFeature;
+  feature_3: FeaturesFeature;
+}
+
+export interface FeaturesFeature {
+  title: string;
+  icon: string;
+  description: string;
+}
+
+export interface Footer {
+  socialMediaLinks: string[];
+}
+
+export interface Header {
+  logo: string;
+  navigationMenuItems: string[];
+}
+
+export interface Hero {
+  title: string;
+  description: string;
+  jumbotron: string;
+  cta: string;
+}
+
+export interface IndividualFeatures {
+  feature_1: IndividualFeaturesFeature;
+  feature_2: IndividualFeaturesFeature;
+  feature_3: IndividualFeaturesFeature;
+}
+
+export interface IndividualFeaturesFeature {
+  title: string;
+  description: string;
+  cta: string;
+  backgroundImageDescription: string;
+}
+
+export interface Map {
+  locationDescription: string;
+  googleMapsAPIKey: string;
+}
+
+export interface Newsletter {
+  title: string;
+  cta: string;
+}
+
+export interface Team {
+  member_1: Member;
+  member_2: Member;
+  member_3: Member;
+}
+
+export interface Member {
+  name: string;
+  role: string;
+  socialMediaLinks: string[];
+}
+
+export interface Testimonials {
+  testimonial_1: Testimonial;
+  testimonial_2: Testimonial;
+}
+
+export interface Testimonial {
+  name: string;
+  role: string;
+  feedback: string;
 }
