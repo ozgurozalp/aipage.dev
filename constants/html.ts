@@ -1,13 +1,21 @@
 import {
+  Blog,
+  FAQ,
+  Features,
   FeaturesFeature,
+  Header,
+  Hero,
   IndividualFeatures,
   IndividualFeaturesFeature,
   JSONResponse,
   Member,
   Post,
   Question,
+  Team,
   Testimonial,
+  Testimonials,
 } from "@/types";
+import { promptKeys, prompts } from "@/constants/prompts";
 
 export const html = `<!doctype html>
 <html lang="en">
@@ -21,7 +29,7 @@ export const html = `<!doctype html>
   <body>
     <header>
       <nav
-        class="bg-white border-gray-200 px-4 lg:px-6 py-2.5 dark:bg-gray-800"
+        class="bg-white border-gray-200 px-4 lg:px-6 py-4 dark:bg-gray-800"
       >
         <div
           class="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl"
@@ -32,17 +40,7 @@ export const html = `<!doctype html>
               >LOGO</span
             >
           </a>
-          <div class="flex items-center lg:order-2">
-            <a
-              href="#"
-              class="text-gray-800 dark:text-white hover:bg-gray-50 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 dark:hover:bg-gray-700 focus:outline-none dark:focus:ring-gray-800"
-              >Log in</a
-            >
-            <a
-              href="#"
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-              >Get started</a
-            >
+          <div class="flex lg:hidden items-center lg:order-2">
             <button
               data-collapse-toggle="mobile-menu-2"
               type="button"
@@ -84,7 +82,31 @@ export const html = `<!doctype html>
             <ul
               class="flex flex-col mt-4 font-medium lg:flex-row lg:space-x-8 lg:mt-0"
             >
-              {{MENU}}
+              <li>
+                <a href="#" class="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">
+                  {{MENU_ITEM_1}}
+                </a>
+              </li>
+              <li>
+                <a href="#" class="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">
+                  {{MENU_ITEM_2}}
+                </a>
+              </li>
+              <li>
+                <a href="#" class="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">
+                  {{MENU_ITEM_3}}
+                </a>
+              </li>
+              <li>
+                <a href="#" class="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">
+                  {{MENU_ITEM_4}}
+                </a>
+              </li> 
+              <li>
+                <a href="#" class="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">
+                  {{MENU_ITEM_5}}
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -367,7 +389,87 @@ export const html = `<!doctype html>
         <div
           class="space-y-8 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-12 md:space-y-0"
         >
-          {{FEATURES}}
+          <div>
+            <div
+              class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900"
+            >
+              <svg
+                class="w-5 h-5 text-blue-600 lg:w-6 lg:h-6 dark:text-blue-300"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+                  clip-rule="evenodd"
+                ></path>
+                <path
+                  d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="mb-2 text-xl font-bold dark:text-white">
+              {{FEATURE_1_TITLE}}
+            </h3>
+            <p class="text-gray-500 dark:text-gray-400">
+              {{FEATURE_1_DESCRIPTION}}
+            </p>
+          </div>
+          <div>
+            <div
+              class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900"
+            >
+              <svg
+                class="w-5 h-5 text-blue-600 lg:w-6 lg:h-6 dark:text-blue-300"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+                  clip-rule="evenodd"
+                ></path>
+                <path
+                  d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="mb-2 text-xl font-bold dark:text-white">
+              {{FEATURE_2_TITLE}}
+            </h3>
+            <p class="text-gray-500 dark:text-gray-400">
+              {{FEATURE_2_DESCRIPTION}}
+            </p>
+          </div>
+          <div>
+            <div
+              class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900"
+            >
+              <svg
+                class="w-5 h-5 text-blue-600 lg:w-6 lg:h-6 dark:text-blue-300"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
+                  clip-rule="evenodd"
+                ></path>
+                <path
+                  d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="mb-2 text-xl font-bold dark:text-white">
+              {{FEATURE_3_TITLE}}
+            </h3>
+            <p class="text-gray-500 dark:text-gray-400">
+              {{FEATURE_3_DESCRIPTION}}
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -375,50 +477,113 @@ export const html = `<!doctype html>
     <section class="bg-white dark:bg-gray-900">
       <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
         <div class="space-y-6">
-          <div class="space-y-6">{{INDIVIDUAL_FEATURES}}</div>
+          <div class="space-y-6">
+            <div class="flex odd:flex-row-reverse [&>*]:flex-1 gap-8">
+              <div>
+              <img
+                src="https://source.unsplash.com/featured/1280x720/?{{INDIVIDUAL_FEATURE_1_TITLE}}"
+                class="rounded-lg"
+                alt=""
+              />
+            </div>
+              <div class="flex flex-col justify-center gap-y-4">
+              <h3 class="text-3xl font-semibold text-gray-900 dark:text-white">
+                {{INDIVIDUAL_FEATURE_1_TITLE}}
+              </h3>
+              <p class="text-gray-900 dark:text-white">
+                {{INDIVIDUAL_FEATURE_1_DESCRIPTION}}
+              </p>
+              <a
+                href="#"
+                class="self-start text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                >{{INDIVIDUAL_FEATURE_1_CTA}}</a
+              >
+            </div>
+            </div>
+            <div class="flex odd:flex-row-reverse [&>*]:flex-1 gap-8">
+              <div>
+              <img
+                src="https://source.unsplash.com/featured/1280x720/?{{INDIVIDUAL_FEATURE_2_TITLE}}"
+                class="rounded-lg"
+                alt=""
+              />
+            </div>
+              <div class="flex flex-col justify-center gap-y-4">
+              <h3 class="text-3xl font-semibold text-gray-900 dark:text-white">
+                {{INDIVIDUAL_FEATURE_2_TITLE}}
+              </h3>
+              <p class="text-gray-900 dark:text-white">
+                {{INDIVIDUAL_FEATURE_2_DESCRIPTION}}
+              </p>
+              <a
+                href="#"
+                class="self-start text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                >{{INDIVIDUAL_FEATURE_2_CTA}}</a
+              >
+            </div>
+            </div>
+            <div class="flex odd:flex-row-reverse [&>*]:flex-1 gap-8">
+              <div>
+              <img
+                src="https://source.unsplash.com/featured/1280x720/?{{INDIVIDUAL_FEATURE_3_TITLE}}"
+                class="rounded-lg"
+                alt=""
+              />
+            </div>
+              <div class="flex flex-col justify-center gap-y-4">
+              <h3 class="text-3xl font-semibold text-gray-900 dark:text-white">
+                {{INDIVIDUAL_FEATURE_3_TITLE}}
+              </h3>
+              <p class="text-gray-900 dark:text-white">
+                {{INDIVIDUAL_FEATURE_3_DESCRIPTION}}
+              </p>
+              <a
+                href="#"
+                class="self-start text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                >{{INDIVIDUAL_FEATURE_3_CTA}}</a
+              >
+            </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="bg-gray-50 dark:bg-gray-800">
-      <div
-        class="gap-16 items-center py-8 px-4 mx-auto max-w-screen-xl lg:grid lg:grid-cols-2 lg:py-16 lg:px-6"
-      >
-        <div class="font-light text-gray-500 sm:text-lg dark:text-gray-400">
-          <h2
-            class="mb-4 text-4xl font-extrabold text-gray-900 dark:text-white"
-          >
-            {{SECTION_2_TITLE}}
-          </h2>
-          <p class="mb-4">{{SECTION_2_DESCRIPTION}}</p>
-        </div>
-        <div class="grid grid-cols-2 gap-4 mt-8">
-          <img
-            class="w-full rounded-lg"
-            src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/content/office-long-2.png"
-            alt="office content 1"
-          />
-          <img
-            class="mt-4 w-full lg:mt-10 rounded-lg"
-            src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/content/office-long-1.png"
-            alt="office content 2"
-          />
-        </div>
-      </div>
-    </section>
-
-    <section class="bg-white dark:bg-gray-900">
       <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
         <h2
           class="mb-8 text-4xl text-center font-extrabold leading-tight text-gray-900 dark:text-white"
         >
           Testimonials
         </h2>
-        <div class="grid grid-cols-2 gap-x-6">{{TESTIMONIALS}}</div>
+        <div class="grid grid-cols-2 gap-x-6">
+          <div
+            class="bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 rounded-lg p-8"
+          >
+            <p>
+              {{TESTIMONIAL_1_FEEDBACK}}
+            </p>
+            <div class="mt-4">
+              <h4 class="text-lg font-semibold text-gray-600 dark:text-gray-300">{{TESTIMONIAL_1_NAME}}</h4>
+              <p class="text-sm">{{TESTIMONIAL_1_ROLE}}</p>
+            </div>
+          </div>
+          <div
+            class="bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 rounded-lg p-8"
+          >
+            <p>
+              {{TESTIMONIAL_2_FEEDBACK}}
+            </p>
+            <div class="mt-4">
+              <h4 class="text-lg font-semibold text-gray-600 dark:text-gray-300">{{TESTIMONIAL_2_NAME}}</h4>
+              <p class="text-sm">{{TESTIMONIAL_2_ROLE}}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="bg-gray-50 dark:bg-gray-800">
+    <section class="bg-white dark:bg-gray-900">
       <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
         <h2
           class="mb-8 text-4xl text-center font-extrabold leading-tight text-gray-900 dark:text-white"
@@ -426,7 +591,84 @@ export const html = `<!doctype html>
           Recent Blog Posts
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-12">
-          {{BLOGS}}
+          <div>
+            <h4 class="text-lg text-gray-900 dark:text-white font-semibold mb-2">{{POST_1_TITLE}}</h4>
+            <p class="text-gray-800 dark:text-white/90">
+               {{POST_1_DESCRIPTION}}
+            </p>
+            <a href="#" class="mt-2 block text-blue-500 hover:underline">Read More</a>
+          </div>
+          <div>
+            <h4 class="text-lg text-gray-900 dark:text-white font-semibold mb-2">{{POST_2_TITLE}}</h4>
+            <p class="text-gray-800 dark:text-white/90">
+               {{POST_2_DESCRIPTION}}
+            </p>
+            <a href="#" class="mt-2 block text-blue-500 hover:underline">Read More</a>
+          </div>
+          <div>
+            <h4 class="text-lg text-gray-900 dark:text-white font-semibold mb-2">{{POST_3_TITLE}}</h4>
+            <p class="text-gray-800 dark:text-white/90">
+               {{POST_3_DESCRIPTION}}
+            </p>
+            <a href="#" class="mt-2 block text-blue-500 hover:underline">Read More</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-gray-50 dark:bg-gray-800">
+      <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+        <h2
+          class="mb-8 text-4xl text-center font-extrabold leading-tight text-gray-900 dark:text-white"
+        >
+          Our Team
+        </h2>
+        <div class="grid grid-cols-3 gap-x-6">
+           <div
+            class="bg-gray-50 text-gray-600 space-y-2 dark:bg-gray-800 dark:text-gray-400 rounded-lg p-8"
+          >
+            <div class="flex justify-center">
+              <img alt="{{TEAM_MEMBER_1_NAME}}" class="object-cover rounded-full" src="https://via.placeholder.com/150">
+            </div>
+            <div class="text-center space-y-2">
+              <p class="text-gray-900 font-bold dark:text-white">
+                {{TEAM_MEMBER_1_NAME}}
+              </p>
+              <span class="text-gray-800 dark:text-white/90">
+                {{TEAM_MEMBER_1_ROLE}}
+              </span>
+            </div>
+          </div>
+           <div
+            class="bg-gray-50 text-gray-600 space-y-2 dark:bg-gray-800 dark:text-gray-400 rounded-lg p-8"
+          >
+            <div class="flex justify-center">
+              <img alt="{{TEAM_MEMBER_2_NAME}}" class="object-cover rounded-full" src="https://via.placeholder.com/150">
+            </div>
+            <div class="text-center space-y-2">
+              <p class="text-gray-900 font-bold dark:text-white">
+                {{TEAM_MEMBER_2_NAME}}
+              </p>
+              <span class="text-gray-800 dark:text-white/90">
+                {{TEAM_MEMBER_2_ROLE}}
+              </span>
+            </div>
+          </div>
+           <div
+            class="bg-gray-50 text-gray-600 space-y-2 dark:bg-gray-800 dark:text-gray-400 rounded-lg p-8"
+          >
+            <div class="flex justify-center">
+              <img alt="{{TEAM_MEMBER_3_NAME}}" class="object-cover rounded-full" src="https://via.placeholder.com/150">
+            </div>
+            <div class="text-center space-y-2">
+              <p class="text-gray-900 font-bold dark:text-white">
+                {{TEAM_MEMBER_3_NAME}}
+              </p>
+              <span class="text-gray-800 dark:text-white/90">
+                {{TEAM_MEMBER_3_ROLE}}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -436,26 +678,46 @@ export const html = `<!doctype html>
         <h2
           class="mb-8 text-4xl text-center font-extrabold leading-tight text-gray-900 dark:text-white"
         >
-          Our Team
-        </h2>
-        <div class="grid grid-cols-3 gap-x-6">{{TEAM}}</div>
-      </div>
-    </section>
-
-    <section class="bg-gray-50 dark:bg-gray-800">
-      <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-        <h2
-          class="mb-8 text-4xl text-center font-extrabold leading-tight text-gray-900 dark:text-white"
-        >
           Frequently asked questions
         </h2>
         <div>
-          <div class="space-y-6">{{FAQS}}</div>
+          <div class="space-y-6">
+            <div>
+              <div
+                class="text-gray-900 dark:text-white text-lg leading-6 font-medium"
+              >
+                {{FAQ_1_QUESTION}}
+              </div>
+              <div class="mt-2 text-base text-gray-900 dark:text-white/60">
+                {{FAQ_1_ANSWER}}
+              </div>
+            </div>
+            <div>
+              <div
+                class="text-gray-900 dark:text-white text-lg leading-6 font-medium"
+              >
+                {{FAQ_2_QUESTION}}
+              </div>
+              <div class="mt-2 text-base text-gray-900 dark:text-white/60">
+                {{FAQ_2_ANSWER}}
+              </div>
+            </div>
+            <div>
+              <div
+                class="text-gray-900 dark:text-white text-lg leading-6 font-medium"
+              >
+                {{FAQ_3_QUESTION}}
+              </div>
+              <div class="mt-2 text-base text-gray-900 dark:text-white/60">
+                {{FAQ_3_ANSWER}}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <footer class="p-4 bg-gray-50 sm:p-6 bg-white dark:bg-gray-900">
+    <footer class="p-4 bg-gray-50 sm:p-6 dark:bg-gray-900">
       <div class="mx-auto max-w-screen-xl">
         <div class="md:flex md:justify-between">
           <div class="mb-6 md:mb-0">
@@ -615,156 +877,134 @@ export const html = `<!doctype html>
 </html>
 `;
 
-export function replacedHTML(html: string, json: JSONResponse) {
-  return html
-    .replace(
-      "{{MENU}}",
-      json?.header?.navigationMenuItems
-        .map(
-          (item) =>
-            `<li><a href="#" class="block py-2 pr-4 pl-3 text-gray-700 border-b border-gray-100 hover:bg-gray-50 lg:hover:bg-transparent lg:border-0 lg:hover:text-blue-700 lg:p-0 dark:text-gray-400 lg:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white lg:dark:hover:bg-transparent dark:border-gray-700">${item}</a></li>`,
-        )
-        .join(""),
-    )
-    .replace(
-      "{{FEATURES}}",
-      Object.entries(json.features)
-        .map(([, feature]: [string, FeaturesFeature]) => {
-          return `<div>
-            <div
-              class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900"
-            >
-              <svg
-                class="w-5 h-5 text-blue-600 lg:w-6 lg:h-6 dark:text-blue-300"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z"
-                  clip-rule="evenodd"
-                ></path>
-                <path
-                  d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"
-                ></path>
-              </svg>
-            </div>
-            <h3 class="mb-2 text-xl font-bold dark:text-white">
-              ${feature.title}
-            </h3>
-            <p class="text-gray-500 dark:text-gray-400">
-              ${feature.description}
-            </p>
-          </div>`;
-        })
-        .join(""),
-    )
-    .replace(
-      "{{INDIVIDUAL_FEATURES}}",
-      Object.entries(json.individualFeatures)
-        .map(([, feature]: [string, IndividualFeaturesFeature]) => {
-          return `<div class="flex odd:flex-row-reverse [&>*]:flex-1 gap-8">
-            <div>
-              <img
-                src="https://source.unsplash.com/featured/1280x720/?${feature.title}"
-                class="rounded-lg"
-                alt=""
-              />
-            </div>
-            <div class="flex flex-col justify-center gap-y-4">
-              <h3 class="text-3xl font-semibold text-gray-900 dark:text-white">
-                ${feature.title}
-              </h3>
-              <p class="text-gray-900 dark:text-white">
-                ${feature.description}
-              </p>
-              <a
-                href="#"
-                class="self-start text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                >${feature.cta}</a
-              >
-            </div>
-          </div>`;
-        })
-        .join(""),
-    )
-    .replace(
-      "{{FAQS}}",
-      Object.entries(json.faq)
-        .map(([, faq]: [string, Question]) => {
-          return `<div>
-              <div
-                class="text-gray-900 dark:text-white text-lg leading-6 font-medium"
-              >
-                ${faq.question}
-              </div>
-              <div class="mt-2 text-base text-gray-900 dark:text-white/60">
-                ${faq.answer}
-              </div>
-            </div>`;
-        })
-        .join(""),
-    )
-    .replace(
-      "{{TESTIMONIALS}}",
-      Object.entries(json.testimonials)
-        .map(([, testimonial]: [string, Testimonial]) => {
-          return `<div
-            class="bg-gray-50 text-gray-600 dark:bg-gray-800 dark:text-gray-400 rounded-lg p-8"
-          >
-            <p>
-              ${testimonial.feedback}
-            </p>
-            <div class="mt-4">
-              <h4 class="text-lg font-semibold">${testimonial.name}</h4>
-              <p class="text-sm">${testimonial.role}</p>
-            </div>
-          </div>`;
-        })
-        .join(""),
-    )
-    .replace(
-      "{{BLOGS}}",
-      Object.entries(json.blog)
-        .map(([, post]: [string, Post]) => {
-          return `<div>
-            <h4 class="text-lg text-gray-900 dark:text-white font-semibold mb-2">${post.title}</h4>
-            <p class="text-gray-800 dark:text-white/90">
-               ${post.shortDescription}
-            </p>
-            <a href="#" class="mt-2 block text-blue-500 hover:underline">Read More</a>
-          </div>`;
-        })
-        .join(""),
-    )
-    .replace(
-      "{{TEAM}}",
-      Object.entries(json.team)
-        .map(([, team]: [string, Member]) => {
-          return `<div
-            class="bg-gray-50 text-gray-600 space-y-2 dark:bg-gray-800 dark:text-gray-400 rounded-lg p-8"
-          >
-            <div class="flex justify-center">
-              <img alt="${team.name}" class="object-cover rounded-full" src="https://via.placeholder.com/150">
-            </div>
-            <div class="text-center space-y-2">
-              <p class="text-gray-900 font-bold dark:text-white">
-                ${team.name}
-              </p>
-              <span class="text-gray-800 dark:text-white/90">
-                ${team.role}
-              </span>
-            </div>
-          </div>`;
-        })
-        .join(""),
-    )
-    .replace("{{HERO_TITLE}}", json.hero.title)
-    .replace("{{HERO_CTA}}", json.hero.cta)
-    .replace("{{HERO_DESCRIPTION}}", json.hero.description)
-    .replace("{{SECTION_1_TITLE}}", json.features.feature_1.title)
-    .replace("{{SECTION_1_DESCRIPTION}}", json.features.feature_1.description)
-    .replace("{{SECTION_2_TITLE}}", json.features.feature_2.title)
-    .replace("{{SECTION_2_DESCRIPTION}}", json.features.feature_2.description);
+export function replaceMenu(html: string, { header }: { header: Header }) {
+  header.navigationMenuItems.forEach((menu, index) => {
+    html = html.replace(`{{MENU_ITEM_${index + 1}}}`, menu);
+  });
+
+  return html;
 }
+export function replaceFeatures(
+  html: string,
+  { features }: { features: Features },
+) {
+  Object.entries(features).forEach(
+    ([, feature]: [string, FeaturesFeature], index) => {
+      html = html.replace(`{{FEATURE_${index + 1}_TITLE}}`, feature.title);
+      html = html.replace(
+        `{{FEATURE_${index + 1}_DESCRIPTION}}`,
+        feature.description,
+      );
+    },
+  );
+
+  return html;
+}
+export function replaceIndividualFeatures(
+  html: string,
+  { individualFeatures }: { individualFeatures: IndividualFeatures },
+) {
+  Object.entries(individualFeatures).forEach(
+    ([, feature]: [string, IndividualFeaturesFeature], index) => {
+      html = html.replaceAll(
+        `{{INDIVIDUAL_FEATURE_${index + 1}_TITLE}}`,
+        feature.title,
+      );
+      html = html.replace(
+        `{{INDIVIDUAL_FEATURE_${index + 1}_DESCRIPTION}}`,
+        feature.description,
+      );
+      html = html.replace(
+        `{{INDIVIDUAL_FEATURE_${index + 1}_CTA}}`,
+        feature.cta,
+      );
+    },
+  );
+
+  return html;
+}
+
+export function replaceFaqs(html: string, { faq }: { faq: FAQ }) {
+  Object.entries(faq).forEach(([, f]: [string, Question], index) => {
+    html = html.replaceAll(`{{FAQ_${index + 1}_QUESTION}}`, f.question);
+    html = html.replace(`{{FAQ_${index + 1}_ANSWER}}`, f.answer);
+  });
+
+  return html;
+}
+
+export function replaceTestimonials(
+  html: string,
+  { testimonials }: { testimonials: Testimonials },
+) {
+  Object.entries(testimonials).forEach(
+    ([, testimonial]: [string, Testimonial], index) => {
+      html = html.replaceAll(
+        `{{TESTIMONIAL_${index + 1}_FEEDBACK}}`,
+        testimonial.feedback,
+      );
+      html = html.replace(
+        `{{TESTIMONIAL_${index + 1}_NAME}}`,
+        testimonial.name,
+      );
+      html = html.replace(
+        `{{TESTIMONIAL_${index + 1}_ROLE}}`,
+        testimonial.role,
+      );
+    },
+  );
+
+  return html;
+}
+
+export function replaceBlog(html: string, { blog }: { blog: Blog }) {
+  Object.entries(blog).forEach(([, post]: [string, Post], index) => {
+    html = html.replaceAll(`{{POST_${index + 1}_TITLE}}`, post.title);
+    html = html.replace(
+      `{{POST_${index + 1}_DESCRIPTION}}`,
+      post.shortDescription,
+    );
+  });
+
+  return html;
+}
+export function replaceTeam(html: string, { team }: { team: Team }) {
+  Object.entries(team).forEach(([, team]: [string, Member], index) => {
+    html = html.replaceAll(`{{TEAM_MEMBER_${index + 1}_NAME}}`, team.name);
+    html = html.replace(`{{TEAM_MEMBER_${index + 1}_ROLE}}`, team.role);
+  });
+
+  return html;
+}
+
+export function replaceHero(html: string, { hero }: { hero: Hero }) {
+  html = html.replace("{{HERO_TITLE}}", hero.title);
+  html = html.replace("{{HERO_CTA}}", hero.cta);
+  html = html.replace("{{HERO_DESCRIPTION}}", hero.description);
+
+  return html;
+}
+
+export function replaceSection(
+  html: string,
+  { feature }: { feature: Features },
+) {
+  return html
+    .replace("{{SECTION_2_TITLE}}", feature.feature_2.title)
+    .replace("{{SECTION_2_DESCRIPTION}}", feature.feature_2.description);
+}
+
+export const functionMap: Record<
+  keyof typeof prompts,
+  (html: string, data: any) => string
+> = {
+  hero: replaceHero,
+  header: replaceMenu,
+  features: replaceFeatures,
+  individualFeatures: replaceIndividualFeatures,
+  faq: replaceFaqs,
+  testimonials: replaceTestimonials,
+  blog: replaceBlog,
+  team: replaceTeam,
+  section: replaceSection,
+};

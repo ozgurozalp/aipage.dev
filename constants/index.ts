@@ -56,3 +56,4 @@ export const fonts = [
 ];
 
 export * from "./html";
+export * from "./prompts";

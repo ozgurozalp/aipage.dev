@@ -1,7 +1,5 @@
 "use client";
-import { useChat } from "ai/react";
-import { useEffect, useRef, useState } from "react";
-import Frame from "react-frame-component";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import html2canvas from "html2canvas";
 import TweetButton from "@/components/tweetButton";
@@ -10,12 +8,12 @@ import useSearchParams from "@/hooks/useSearchParams";
 import RateModal from "@/components/RateModal";
 import { cn, updateProject } from "@/utils/helpers";
 import {
-  replacedHTML,
   html,
   predefinedColors,
   predefinedColorsSecondary,
+  promptKeys,
+  functionMap,
 } from "@/constants";
-import { JSONResponse } from "@/types";
 import LoadingSpinner from "@/components/loadingSpinner";
 
 enum DeviceSize {
@@ -25,6 +23,10 @@ enum DeviceSize {
 }
 
 export default function Chat() {
+  const [show, setShow] = useState(false);
+  const [results, setResults] = useState<object>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [input, setInput] = useState("");
   const [htmlContent, setHtmlContent] = useState(html);
   const [isColorModalOpen, setIsColorModalOpen] = useState(false);
   const [primaryColor, setPrimaryColor] = useState(predefinedColors[0]);
@@ -38,30 +40,17 @@ export default function Chat() {
   const [hasNoCreditsError, setHasNoCreditsError] = useState(false);
   const { set } = useSearchParams();
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, stop } =
-    useChat({
-      onResponse: (message) => {
-        setHtmlContent(html);
-        setHasNoCreditsError(false);
-        setLastMessageId(null);
-        decreaseCredit();
-      },
-      onFinish: async (message) => {
-        try {
-          const res = JSON.parse(message.content) as { credits: number };
-          setCredits(res.credits);
-          setHasNoCreditsError(res.credits === 0);
-        } catch {
-          await saveResult(message.content);
-        }
-        setHtmlContent(
-          replacedHTML(
-            html,
-            JSON.parse(message.content) as unknown as JSONResponse,
-          ),
-        );
-      },
-    });
+  const [iframeContent, setIframeContent] = useState("");
+  const [imageSrc, setImageSrc] = useState<string>("");
+
+  const [deviceSize, setDeviceSize] = useState(DeviceSize.Desktop);
+  const iframeRef = useRef(null);
+  const [fileName, setFileName] = useState("");
+  const [selectedElement, setSelectedElement] = useState<Element | null>(null);
+  const [editedContent, setEditedContent] = useState<string>("");
+  const [editingMode, setEditingMode] = useState(false);
+  const [codeViewActive, setCodeViewActive] = useState(false);
+  const [isStopped, setIsStopped] = useState(false);
 
   const handleColorModalToggle = () => {
     setIsColorModalOpen((prevState) => !prevState);
@@ -103,17 +92,55 @@ export default function Chat() {
     set("rateModal", "true");
   }
 
-  const [iframeContent, setIframeContent] = useState("");
-  const [imageSrc, setImageSrc] = useState<string>("");
+  async function sendRequest() {
+    setIsLoading(true);
+    setShow(false);
+    setHtmlContent(html);
+    setResults({});
 
-  const [deviceSize, setDeviceSize] = useState(DeviceSize.Desktop);
-  const iframeRef = useRef(null);
-  const [fileName, setFileName] = useState("");
-  const [selectedElement, setSelectedElement] = useState<Element | null>(null);
-  const [editedContent, setEditedContent] = useState<string>("");
-  const [editingMode, setEditingMode] = useState(false);
-  const [codeViewActive, setCodeViewActive] = useState(false);
-  const [isStopped, setIsStopped] = useState(false);
+    for (let promptKey of promptKeys) {
+      fetch(`/api/generate/${promptKey}`, {
+        method: "POST",
+        body: JSON.stringify({
+          content: input,
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) return Promise.reject(res);
+          return res.json();
+        })
+        .then((result) => {
+          if (!result[promptKey]) {
+            result = {
+              [promptKey]: result,
+            };
+          }
+
+          setResults((prevState) => ({
+            ...prevState,
+            ...result,
+          }));
+
+          const func = functionMap[promptKey];
+          if (func && result) {
+            setHtmlContent((prev) => func(prev, result));
+            setShow(true);
+          }
+        })
+        .catch(console.error);
+    }
+  }
+
+  useEffect(() => {
+    if (!show) return;
+    console.log({ results });
+  }, [show]);
+
+  useEffect(() => {
+    if (!show) return;
+
+    //setHtmlContent(replacedHTML(htmlContent, results as JSONResponse));
+  }, [show]);
 
   const appendToIframe = (content: any) => {
     if (iframeRef.current) {
@@ -155,21 +182,15 @@ export default function Chat() {
     }
   };
 
-  useEffect(() => {
-    const stream = new EventSource("/api/chat");
-    stream.onmessage = (event) => {
-      appendToIframe(event.data);
-    };
-
-    return () => stream.close();
-  }, []);
-
+  /*
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.role !== "user") {
       setIframeContent(lastMessage.content);
     }
   }, [messages]);
+
+   */
 
   const handleSave = () => {
     const element = document.createElement("a");
@@ -286,6 +307,11 @@ export default function Chat() {
     await saveResult(iframeContent);
   };
 
+  function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    sendRequest();
+  }
+
   return (
     <>
       <div className="flex flex-col w-full min-h-screen bg-gradient-to-b from-white via-white to-slate-300 mx-auto px-4 md:px-16 lg:px-24 overflow-hidden items-center pt-24 md:pt-36">
@@ -352,7 +378,7 @@ export default function Chat() {
               value={input}
               // update placeholder when the GPT is typing
               placeholder={isLoading ? "Generating... " : "Say something..."}
-              onChange={user ? handleInputChange : undefined}
+              onChange={user ? (e) => setInput(e.target.value) : undefined}
               onFocus={onFocusHandler}
               readOnly={!user}
               disabled={isLoading}
@@ -363,65 +389,6 @@ export default function Chat() {
                   <b>Tip:</b> A landing page for Medical website
                 </p>
               )}
-              {/*
-              <div className="pr-4">
-                <ColorPickerModal
-                  onPrimaryColorChange={handlePrimaryColorChange}
-                  onSecondaryColorChange={handleSecondaryColorChange}
-                  onFontChange={handleFontChange}
-                  onLayoutChange={handleLayoutChange}
-                  primaryColor={primaryColor}
-                  secondaryColor={secondaryColor}
-                  font={font}
-                  layout={layout}
-                >
-                  <button
-                    type="button"
-                    className="text-gray-500 focus:outline-none"
-                    onClick={handleColorModalToggle}
-                  >
-                    <div className="flex gap-2 items-center">
-                      {layout && (
-                        <div
-                          id="layout"
-                          className={cn(
-                            "h-6 w-auto rounded-md",
-                            "shadow-inner border-inner border border-slate-300",
-                            "cursor-pointer flex items-center justify-between px-3",
-                          )}
-                        >
-                          <span className="text-xs font-medium">{layout}</span>
-                        </div>
-                      )}
-                      {font && (
-                        <div
-                          className={cn(
-                            "h-6 w-auto rounded-md shadow-inner border-inner border border-slate-300 cursor-pointer flex items-center justify-between px-3",
-                          )}
-                          style={{
-                            fontFamily: font,
-                          }}
-                        >
-                          <span className="text-xs font-medium">{font}</span>
-                        </div>
-                      )}
-                      {primaryColor && (
-                        <div
-                          className={`h-6 w-6 rounded-lg shadow-inner`}
-                          style={{ backgroundColor: primaryColor.code }}
-                        />
-                      )}
-                      {secondaryColor && (
-                        <div
-                          className={`h-6 w-6 rounded-lg shadow-inner`}
-                          style={{ backgroundColor: secondaryColor.code }}
-                        />
-                      )}
-                    </div>
-                  </button>
-                </ColorPickerModal>
-              </div>
-              */}
             </div>
           </form>
         </div>
@@ -463,109 +430,108 @@ export default function Chat() {
               Please try again tomorrow.
             </p>
           </div>
-        ) : isLoading ? (
-          <LoadingSpinner />
         ) : (
-          iframeContent && (
-            <div className="flex flex-col items-center py-4 w-full">
-              <div className={cn(deviceSize)}>
-                <div className="border flex items-center bg-white rounded-t-xl justify-between p-3 border-b lg:px-12 sticky top-4 z-10">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  </div>
-                  <div className="flex-1 text-center">
-                    <div className="flex items-center justify-between space-x-2 bg-gray-200 rounded-xl mx-8 py-1 px-2">
-                      <div className="flex items-center w-3 h-3"></div>
-                      <div className="flex items-center space-x-2">
-                        acme.co
-                        {isLoading && (
-                          <span className="ml-4 animate-spin">🟠</span>
-                        )}
-                        <button
-                          className="ml-4 hidden md:flex"
-                          onClick={() => setDeviceSize(DeviceSize.Mobile)}
-                        >
-                          📱
-                        </button>
-                        <button
-                          className=" hidden md:flex"
-                          onClick={() => setDeviceSize(DeviceSize.Tablet)}
-                        >
-                          💻
-                        </button>
-                        <button
-                          className=" hidden md:flex"
-                          onClick={() => setDeviceSize(DeviceSize.Desktop)}
-                        >
-                          🖥️
-                        </button>
-                        <button
-                          className=""
-                          onClick={() => setCodeViewActive(!codeViewActive)}
-                        >
-                          {codeViewActive ? "🖼️" : "🖨️"}
-                        </button>
-                      </div>
-                      {/* Clear and Stop buttons */}
-                      <div className="flex items-center space-x-4">
-                        <button
-                          className={`${
-                            isLoading ? "" : "opacity-70 cursor-not-allowed"
-                          }`}
-                          onClick={handleStop}
-                        >
-                          <span role="img" aria-label="stop">
-                            🟥
-                          </span>
-                        </button>
-                        <button
-                          className={`${
-                            isStopped ? "" : "opacity-70 cursor-not-allowed"
-                          }`}
-                          onClick={() => {
-                            setIframeContent("");
-                            setIsStopped(false);
-                          }}
-                        >
-                          <span role="img" aria-label="clear">
-                            🧽
-                          </span>
-                        </button>
+          <>
+            {isLoading && !show && <LoadingSpinner />}
+            {show && (
+              <div className="flex flex-col items-center py-4 w-full">
+                <div className={cn(deviceSize)}>
+                  <div className="border flex items-center bg-white rounded-t-xl justify-between p-3 border-b lg:px-12 sticky top-4 z-10">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    </div>
+                    <div className="flex-1 text-center">
+                      <div className="flex items-center justify-between space-x-2 bg-gray-200 rounded-xl mx-8 py-1 px-2">
+                        <div className="flex items-center w-3 h-3"></div>
+                        <div className="flex items-center space-x-2">
+                          acme.co
+                          {isLoading && (
+                            <span className="ml-4 animate-spin">🟠</span>
+                          )}
+                          <button
+                            className="ml-4 hidden md:flex"
+                            onClick={() => setDeviceSize(DeviceSize.Mobile)}
+                          >
+                            📱
+                          </button>
+                          <button
+                            className=" hidden md:flex"
+                            onClick={() => setDeviceSize(DeviceSize.Tablet)}
+                          >
+                            💻
+                          </button>
+                          <button
+                            className=" hidden md:flex"
+                            onClick={() => setDeviceSize(DeviceSize.Desktop)}
+                          >
+                            🖥️
+                          </button>
+                          <button
+                            className=""
+                            onClick={() => setCodeViewActive(!codeViewActive)}
+                          >
+                            {codeViewActive ? "🖼️" : "🖨️"}
+                          </button>
+                        </div>
+                        {/* Clear and Stop buttons */}
+                        <div className="flex items-center space-x-4">
+                          <button
+                            className={`${
+                              isLoading ? "" : "opacity-70 cursor-not-allowed"
+                            }`}
+                            onClick={handleStop}
+                          >
+                            <span role="img" aria-label="stop">
+                              🟥
+                            </span>
+                          </button>
+                          <button
+                            className={`${
+                              isStopped ? "" : "opacity-70 cursor-not-allowed"
+                            }`}
+                            onClick={() => {
+                              setIframeContent("");
+                              setIsStopped(false);
+                            }}
+                          >
+                            <span role="img" aria-label="clear">
+                              🧽
+                            </span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div></div>
-                  <div className="flex justify-end space-x-4">
-                    <button onClick={handleSave}>
-                      <span role="img" aria-label="paper-plane">
-                        📩
-                      </span>
-                    </button>
-                    {!isLoading && iframeContent && (
-                      <button onClick={handleEdit} className="ml-4">
-                        {editingMode ? "💾" : "✏️"}
+                    <div></div>
+                    <div className="flex justify-end space-x-4">
+                      <button onClick={handleSave}>
+                        <span role="img" aria-label="paper-plane">
+                          📩
+                        </span>
                       </button>
+                      {!isLoading && iframeContent && (
+                        <button onClick={handleEdit} className="ml-4">
+                          {editingMode ? "💾" : "✏️"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="border bg-white rounded-b-xl border-t-0 h-[calc(100vh-100px)] overflow-auto">
+                    {codeViewActive && <pre>{htmlContent}</pre>}
+                    {!codeViewActive && (
+                      <iframe
+                        ref={iframeRef}
+                        sandbox="allow-same-origin allow-scripts"
+                        className="w-full h-full"
+                        srcDoc={htmlContent}
+                      />
                     )}
                   </div>
                 </div>
-                <div className="border bg-white rounded-b-xl border-t-0 h-[calc(100vh-100px)] overflow-auto">
-                  {codeViewActive && <pre>{htmlContent}</pre>}
-                  {!codeViewActive && (
-                    <Frame
-                      ref={iframeRef}
-                      sandbox="allow-same-origin allow-scripts"
-                      className="w-full h-full"
-                      initialContent={htmlContent}
-                    >
-                      <></>
-                    </Frame>
-                  )}
-                </div>
               </div>
-            </div>
-          )
+            )}
+          </>
         )}
       </div>
       <RateModal key={lastMessageId} show={!!lastMessageId} />
