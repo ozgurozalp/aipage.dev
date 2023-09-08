@@ -27,6 +27,7 @@
     "monaco-editor": "^0.40.0",
     "next": "13.4.19",
     "openai-edge": "^1.2.2",
+    "partial-json-parser": "^1.2.2",
     "re-resizable": "^6.9.9",
     "react": "18.2.0",
     "react-dom": "^18.2.0",
