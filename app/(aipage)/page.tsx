@@ -1,20 +1,41 @@
 "use client";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  CSSProperties,
+  FormEvent,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Message, useChat } from "ai/react";
 import Image from "next/image";
-import html2canvas from "html2canvas";
-import TweetButton from "@/components/tweetButton";
 import { useAuth } from "@/context/AuthContext";
 import useSearchParams from "@/hooks/useSearchParams";
 import RateModal from "@/components/RateModal";
 import { cn, updateProject } from "@/utils/helpers";
+// @ts-ignore
+import partialParse from "partial-json-parser";
+
 import {
   html,
-  predefinedColors,
-  predefinedColorsSecondary,
-  promptKeys,
-  functionMap,
+  replaceMenu,
+  replaceFeatures,
+  replaceIndividualFeatures,
+  replaceTestimonials,
+  replaceBlog,
+  replaceFaqs,
+  replaceTeam,
+  replaceHero,
+  replaceFooter,
 } from "@/constants";
 import LoadingSpinner from "@/components/loadingSpinner";
+import dynamic from "next/dynamic";
+
+const TweetButton = dynamic(() => import("@/components/tweetButton"), {
+  ssr: false,
+});
 
 enum DeviceSize {
   Mobile = "w-1/2",
@@ -23,54 +44,128 @@ enum DeviceSize {
 }
 
 export default function Chat() {
-  const [show, setShow] = useState(false);
-  const [results, setResults] = useState<object>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    stop: stopHeader,
+    messages: messagesHeader,
+    setInput: setInputHeader,
+    handleSubmit: handleSubmitHeader,
+    isLoading: isLoadingHeader,
+  } = useChat({
+    api: "/api/generate/header",
+  });
+
+  const {
+    stop: stopFooter,
+    messages: messagesFooter,
+    setInput: setInputFooter,
+    handleSubmit: handleSubmitFooter,
+    isLoading: isLoadingFooter,
+  } = useChat({
+    api: "/api/generate/footer",
+  });
+
+  const {
+    stop: stopHero,
+    messages: messagesHero,
+    setInput: setInputHero,
+    handleSubmit: handleSubmitHero,
+    isLoading: isLoadingHero,
+  } = useChat({
+    api: "/api/generate/hero",
+  });
+
+  const {
+    stop: stopFeatures,
+    messages: messagesFeatures,
+    setInput: setInputFeatures,
+    handleSubmit: handleSubmitFeatures,
+    isLoading: isLoadingFeatures,
+  } = useChat({
+    api: "/api/generate/features",
+  });
+
+  const {
+    stop: stopIndividualFeatures,
+    messages: messagesIndividualFeatures,
+    setInput: setInputIndividualFeatures,
+    handleSubmit: handleSubmitIndividualFeatures,
+    isLoading: isLoadingIndividualFeatures,
+  } = useChat({
+    api: "/api/generate/individualFeatures",
+  });
+
+  const {
+    stop: stopTestimonials,
+    messages: messagesTestimonials,
+    setInput: setInputTestimonials,
+    handleSubmit: handleSubmitTestimonials,
+    isLoading: isLoadingTestimonials,
+  } = useChat({
+    api: "/api/generate/testimonials",
+  });
+
+  const {
+    stop: stopBlog,
+    messages: messagesBlog,
+    setInput: setInputBlog,
+    handleSubmit: handleSubmitBlog,
+    isLoading: isLoadingBlog,
+  } = useChat({
+    api: "/api/generate/blog",
+  });
+
+  const {
+    stop: stopFaq,
+    messages: messagesFaq,
+    setInput: setInputFaq,
+    handleSubmit: handleSubmitFaq,
+    isLoading: isLoadingFaq,
+  } = useChat({
+    api: "/api/generate/faq",
+  });
+
+  const {
+    stop: stopTeam,
+    messages: messagesTeam,
+    setInput: setInputTeam,
+    handleSubmit: handleSubmitTeam,
+    isLoading: isLoadingTeam,
+  } = useChat({
+    api: "/api/generate/team",
+  });
+
   const [input, setInput] = useState("");
+  const [show, setShow] = useState(false);
   const [htmlContent, setHtmlContent] = useState(html);
-  const [isColorModalOpen, setIsColorModalOpen] = useState(false);
-  const [primaryColor, setPrimaryColor] = useState(predefinedColors[0]);
-  const [secondaryColor, setSecondaryColor] = useState(
-    predefinedColorsSecondary[0],
-  );
-  const [font, setFont] = useState("Inter");
-  const [layout, setLayout] = useState("Single Column");
   const { user, setUser } = useAuth();
   const [lastMessageId, setLastMessageId] = useState<string | null>(null);
   const [hasNoCreditsError, setHasNoCreditsError] = useState(false);
   const { set } = useSearchParams();
 
   const [iframeContent, setIframeContent] = useState("");
-  const [imageSrc, setImageSrc] = useState<string>("");
 
   const [deviceSize, setDeviceSize] = useState(DeviceSize.Desktop);
-  const iframeRef = useRef(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [fileName, setFileName] = useState("");
-  const [selectedElement, setSelectedElement] = useState<Element | null>(null);
-  const [editedContent, setEditedContent] = useState<string>("");
-  const [editingMode, setEditingMode] = useState(false);
   const [codeViewActive, setCodeViewActive] = useState(false);
   const [isStopped, setIsStopped] = useState(false);
 
-  const handleColorModalToggle = () => {
-    setIsColorModalOpen((prevState) => !prevState);
-  };
+  const isLoading = [
+    isLoadingHeader,
+    isLoadingHero,
+    isLoadingFooter,
+    isLoadingFeatures,
+    isLoadingIndividualFeatures,
+    isLoadingTestimonials,
+    isLoadingBlog,
+    isLoadingFaq,
+    isLoadingTeam,
+  ].some((x) => x);
 
-  const handlePrimaryColorChange = (color: any) => {
-    setPrimaryColor(color);
-  };
-
-  const handleSecondaryColorChange = (color: any) => {
-    setSecondaryColor(color);
-  };
-
-  const handleFontChange = (font: any) => {
-    setFont(font);
-  };
-
-  const handleLayoutChange = (layout: any) => {
-    setLayout(layout);
-  };
+  const height = useMemo(() => {
+    if (!iframeRef.current) return undefined;
+    return iframeRef.current.contentDocument?.documentElement?.scrollHeight;
+  }, [htmlContent, iframeRef.current]);
 
   function decreaseCredit(by: number = 1) {
     if (user) {
@@ -92,105 +187,114 @@ export default function Chat() {
     set("rateModal", "true");
   }
 
-  async function sendRequest() {
-    setIsLoading(true);
-    setShow(false);
-    setHtmlContent(html);
-    setResults({});
+  useEffect(() => {
+    const lastMessage = getLastMessage(messagesFooter);
+    if (!lastMessage) return;
 
-    for (let promptKey of promptKeys) {
-      fetch(`/api/generate/${promptKey}`, {
-        method: "POST",
-        body: JSON.stringify({
-          content: input,
-        }),
-      })
-        .then((res) => {
-          if (!res.ok) return Promise.reject(res);
-          return res.json();
-        })
-        .then((result) => {
-          if (!result[promptKey]) {
-            result = {
-              [promptKey]: result,
-            };
-          }
-
-          setResults((prevState) => ({
-            ...prevState,
-            ...result,
-          }));
-
-          const func = functionMap[promptKey];
-          if (func && result) {
-            setHtmlContent((prev) => func(prev, result));
-            setShow(true);
-          }
-        })
-        .catch(console.error);
-    }
-  }
+    setHtmlContent((prev) =>
+      replaceFooter(prev, parsePartial(lastMessage.content)),
+    );
+    setShow(true);
+  }, [messagesFooter]);
 
   useEffect(() => {
-    if (!show) return;
-    console.log({ results });
-  }, [show]);
+    const lastMessage = getLastMessage(messagesHero);
+    if (!lastMessage) return;
+
+    setHtmlContent((prev) =>
+      replaceHero(prev, parsePartial(lastMessage.content)),
+    );
+    setShow(true);
+  }, [messagesHero]);
 
   useEffect(() => {
-    if (!show) return;
+    const lastMessage = getLastMessage(messagesHeader);
+    if (!lastMessage) return;
 
-    //setHtmlContent(replacedHTML(htmlContent, results as JSONResponse));
-  }, [show]);
+    setHtmlContent((prev) =>
+      replaceMenu(prev, parsePartial(lastMessage.content)),
+    );
+    setShow(true);
+  }, [messagesHeader]);
 
-  const appendToIframe = (content: any) => {
-    if (iframeRef.current) {
-      const iframeDocument = (iframeRef.current as HTMLIFrameElement)
-        .contentDocument;
-      if (iframeDocument) {
-        const newNode = iframeDocument.createElement("div");
-        newNode.innerHTML = content;
-        newNode.querySelectorAll<HTMLElement>("*").forEach((element) => {
-          element.addEventListener("mouseover", () => {
-            element.classList.add("outline-blue"); // Blue border
-          });
-          element.addEventListener("mouseout", () => {
-            element.style.outline = "none";
-          });
-          element.addEventListener("click", () => {
-            setSelectedElement(element);
-            setEditedContent(element.innerHTML);
-          });
-        });
-        requestAnimationFrame(() => {
-          iframeDocument.body.appendChild(newNode);
-        });
-      }
-    }
-  };
-
-  const captureIframeContent = async () => {
-    if (iframeRef.current) {
-      const iframeDocument = (iframeRef.current as HTMLIFrameElement)
-        .contentDocument;
-      if (iframeDocument) {
-        const canvas = await html2canvas(iframeDocument.body);
-        const imgURL = canvas.toDataURL();
-        // You can use imgURL as the src for an image tag to display the image representation of the iframe content
-        // For simplicity, let's just set it to a state variable
-        setImageSrc(imgURL);
-      }
-    }
-  };
-
-  /*
   useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.role !== "user") {
-      setIframeContent(lastMessage.content);
-    }
-  }, [messages]);
+    const lastMessage = getLastMessage(messagesBlog);
+    if (!lastMessage) return;
 
-   */
+    setHtmlContent((prev) =>
+      replaceBlog(prev, parsePartial(lastMessage.content)),
+    );
+    setShow(true);
+  }, [messagesBlog]);
+
+  useEffect(() => {
+    const lastMessage = getLastMessage(messagesFaq);
+    if (!lastMessage) return;
+
+    setHtmlContent((prev) =>
+      replaceFaqs(prev, parsePartial(lastMessage.content)),
+    );
+    setShow(true);
+  }, [messagesFaq]);
+
+  useEffect(() => {
+    const lastMessage = getLastMessage(messagesFooter);
+    if (!lastMessage) return;
+
+    setHtmlContent((prev) =>
+      replaceFeatures(prev, parsePartial(lastMessage.content)),
+    );
+    setShow(true);
+  }, [messagesFooter]);
+
+  useEffect(() => {
+    const lastMessage = getLastMessage(messagesFeatures);
+    if (!lastMessage) return;
+
+    setHtmlContent((prev) =>
+      replaceFeatures(prev, parsePartial(lastMessage.content)),
+    );
+    setShow(true);
+  }, [messagesFeatures]);
+
+  useEffect(() => {
+    const lastMessage = getLastMessage(messagesIndividualFeatures);
+    if (!lastMessage) return;
+
+    setHtmlContent((prev) =>
+      replaceIndividualFeatures(prev, parsePartial(lastMessage.content)),
+    );
+    setShow(true);
+  }, [messagesIndividualFeatures]);
+
+  useEffect(() => {
+    const lastMessage = getLastMessage(messagesTestimonials);
+    if (!lastMessage) return;
+
+    setHtmlContent((prev) =>
+      replaceTestimonials(prev, parsePartial(lastMessage.content)),
+    );
+    setShow(true);
+  }, [messagesTestimonials]);
+
+  useEffect(() => {
+    const lastMessage = getLastMessage(messagesTeam);
+    if (!lastMessage) return;
+
+    setHtmlContent((prev) =>
+      replaceTeam(prev, parsePartial(lastMessage.content)),
+    );
+    setShow(true);
+  }, [messagesTeam]);
+
+  useLayoutEffect(() => {
+    if (!iframeRef.current?.contentDocument) return;
+    requestAnimationFrame(() => {
+      iframeRef.current?.contentDocument?.open();
+      iframeRef.current?.contentDocument?.write(htmlContent);
+      iframeRef.current?.contentDocument?.close();
+    });
+  }, [htmlContent, iframeRef.current]);
 
   const handleSave = () => {
     const element = document.createElement("a");
@@ -203,98 +307,6 @@ export default function Chat() {
     const completionInput = iframeContent;
   };
 
-  const listenersMap = useRef<
-    Map<HTMLElement, { mouseover: () => void; mouseout: () => void }>
-  >(new Map());
-
-  // Create a map to store the listeners for each element
-
-  const handleEdit = () => {
-    if (editingMode) {
-      // Save the updated iframe content
-      if (iframeRef.current) {
-        const iframeDocument = (iframeRef.current as HTMLIFrameElement)
-          .contentDocument;
-        if (iframeDocument) {
-          setIframeContent(iframeDocument.documentElement.innerHTML);
-        }
-      }
-
-      // Disable editing mode by setting the contentEditable property of all elements to false and remove the event listeners
-      if (iframeRef.current) {
-        const iframeDocument = (iframeRef.current as HTMLIFrameElement)
-          .contentDocument;
-        if (iframeDocument) {
-          iframeDocument
-            .querySelectorAll<HTMLElement>("*")
-            .forEach((element) => {
-              element.contentEditable = "false";
-
-              // Get the listeners for the element from the map
-              const listeners = listenersMap.current.get(element);
-              if (listeners) {
-                // Remove the listeners
-                element.removeEventListener("mouseover", listeners.mouseover);
-                element.removeEventListener("mouseout", listeners.mouseout);
-                // Remove the element from the map
-                listenersMap.current.delete(element);
-              }
-            });
-        }
-      }
-    } else {
-      // Enable editing mode by setting the contentEditable property of all elements to true and add event listeners
-      if (iframeRef.current) {
-        const iframeDocument = (iframeRef.current as HTMLIFrameElement)
-          .contentDocument;
-        if (iframeDocument) {
-          iframeDocument
-            .querySelectorAll<HTMLElement>("*")
-            .forEach((element) => {
-              element.contentEditable = "true";
-
-              // Create the event listeners
-              const mouseoverListener = () => {
-                element.classList.add("outline-blue");
-                console.log("Mouseover event fired");
-              };
-              const mouseoutListener = () => {
-                console.log("Mouseout event fired");
-                element.classList.remove("outline-blue");
-              };
-
-              // Add the listeners to the element
-              element.addEventListener("mouseover", mouseoverListener);
-              element.addEventListener("mouseout", mouseoutListener);
-
-              // Store the listeners in the map
-              listenersMap.current.set(element, {
-                mouseover: mouseoverListener,
-                mouseout: mouseoutListener,
-              });
-            });
-        }
-      }
-    }
-
-    setEditingMode(!editingMode);
-  };
-
-  const handleUpdate = () => {
-    if (selectedElement) {
-      selectedElement.innerHTML = editedContent;
-      setSelectedElement(null);
-      setEditedContent("");
-      if (iframeRef.current) {
-        const iframeDocument = (iframeRef.current as HTMLIFrameElement)
-          .contentDocument;
-        if (iframeDocument) {
-          setIframeContent(iframeDocument.documentElement.innerHTML);
-        }
-      }
-    }
-  };
-
   function onFocusHandler() {
     if (!user) {
       set("authModal", "true");
@@ -302,14 +314,50 @@ export default function Chat() {
   }
 
   const handleStop = async () => {
-    stop();
+    stopAll();
     setIsStopped(true);
     await saveResult(iframeContent);
   };
 
-  function handleSubmit(event: FormEvent) {
+  function stopAll() {
+    stopHeader();
+    stopHero();
+    stopFooter();
+    stopFeatures();
+    stopIndividualFeatures();
+    stopTestimonials();
+    stopBlog();
+    stopFaq();
+    stopTeam();
+  }
+
+  function handleChange(event: ChangeEvent) {
+    const value = (event.target as HTMLInputElement).value;
+    setInput(value);
+    setInputHero(value);
+    setInputHeader(value);
+    setInputFeatures(value);
+    setInputIndividualFeatures(value);
+    setInputTestimonials(value);
+    setInputBlog(value);
+    setInputFaq(value);
+    setInputTeam(value);
+    setInputFooter(value);
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    sendRequest();
+    setShow(false);
+    setHtmlContent(html);
+    handleSubmitHero(event);
+    handleSubmitHeader(event);
+    handleSubmitFeatures(event);
+    handleSubmitIndividualFeatures(event);
+    handleSubmitTestimonials(event);
+    handleSubmitBlog(event);
+    handleSubmitFaq(event);
+    handleSubmitTeam(event);
+    handleSubmitFooter(event);
   }
 
   return (
@@ -325,9 +373,7 @@ export default function Chat() {
             <TweetButton />
           </div>
         </section>
-
         {/* Display the image if imageSrc is set */}
-
         <section>
           <div className="fixed bottom-6 right-6 cursor-pointer transition-colors group">
             <div className="tooltip opacity-0 group-hover:opacity-100 bg-gray-700 text-white text-xs rounded py-1 px-2 absolute  right-8 bottom-4 transform translate-y-2 w-48">
@@ -343,7 +389,6 @@ export default function Chat() {
             </a>
           </div>
         </section>
-
         {isLoading ? null : (
           <div className="relative py-6 flex flex-col justify-center">
             <Image
@@ -378,7 +423,7 @@ export default function Chat() {
               value={input}
               // update placeholder when the GPT is typing
               placeholder={isLoading ? "Generating... " : "Say something..."}
-              onChange={user ? (e) => setInput(e.target.value) : undefined}
+              onChange={user ? handleChange : undefined}
               onFocus={onFocusHandler}
               readOnly={!user}
               disabled={isLoading}
@@ -392,18 +437,6 @@ export default function Chat() {
             </div>
           </form>
         </div>
-
-        {editingMode && selectedElement && (
-          <div className="absolute z-50">
-            <p>Edit the selected element:</p>
-            <input
-              value={editedContent}
-              onChange={(e) => setEditedContent(e.target.value)}
-            />
-            <button onClick={handleUpdate}>Update</button>
-          </div>
-        )}
-
         {hasNoCreditsError ? (
           <div className="flex flex-col items-center justify-center">
             <svg
@@ -434,8 +467,8 @@ export default function Chat() {
           <>
             {isLoading && !show && <LoadingSpinner />}
             {show && (
-              <div className="flex flex-col items-center py-4 w-full">
-                <div className={cn(deviceSize)}>
+              <div className="overscroll-contain flex flex-col flex-1 items-center py-4 w-full">
+                <div className={cn(deviceSize, "h-full flex-1 flex flex-col")}>
                   <div className="border flex items-center bg-white rounded-t-xl justify-between p-3 border-b lg:px-12 sticky top-4 z-10">
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -510,21 +543,27 @@ export default function Chat() {
                           📩
                         </span>
                       </button>
-                      {!isLoading && iframeContent && (
-                        <button onClick={handleEdit} className="ml-4">
-                          {editingMode ? "💾" : "✏️"}
-                        </button>
-                      )}
                     </div>
                   </div>
-                  <div className="border bg-white rounded-b-xl border-t-0 h-[calc(100vh-100px)] overflow-auto">
+                  <div
+                    style={
+                      {
+                        "--h": `${height}px`,
+                      } as CSSProperties
+                    }
+                    className={cn(
+                      "border bg-white rounded-b-xl border-t-0 overflow-auto",
+                      height ? "h-[--h]" : "h-[calc(100vh-100px)]",
+                    )}
+                  >
                     {codeViewActive && <pre>{htmlContent}</pre>}
                     {!codeViewActive && (
                       <iframe
+                        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                         ref={iframeRef}
-                        sandbox="allow-same-origin allow-scripts"
-                        className="w-full h-full"
-                        srcDoc={htmlContent}
+                        className={cn(
+                          "w-full flex-1 h-full overscroll-contain",
+                        )}
                       />
                     )}
                   </div>
@@ -537,4 +576,17 @@ export default function Chat() {
       <RateModal key={lastMessageId} show={!!lastMessageId} />
     </>
   );
+}
+
+function parsePartial(data: any) {
+  try {
+    return partialParse(data);
+  } catch {}
+}
+
+function getLastMessage(message: Message[]) {
+  const lastMessage = message[message.length - 1];
+  if (lastMessage && lastMessage.role !== "user") {
+    return lastMessage;
+  }
 }

@@ -5,6 +5,7 @@ import {
 } from "openai-edge";
 import { NextResponse } from "next/server";
 import { prompts } from "@/constants";
+import { OpenAIStream, StreamingTextResponse } from "ai";
 
 const config = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
@@ -24,7 +25,7 @@ export async function POST(
     };
   },
 ) {
-  const { content } = await req.json();
+  const { messages } = await req.json();
 
   const systemPrompt = prompts[params.prompt];
 
@@ -32,40 +33,17 @@ export async function POST(
     return NextResponse.json({ message: "prompt not found" }, { status: 404 });
   }
 
-  const messages: ChatCompletionRequestMessage[] = [
-    { role: "user", content },
-    { role: "system", content: systemPrompt },
-  ];
-
-  /*
-  const response = await openai.createCompletion({
+  const response = await openai.createChatCompletion({
     model: "gpt-3.5-turbo-16k",
-    messages,
-    stream: false,
+    messages: [...messages, { role: "system", content: systemPrompt }].map(
+      (message: any) => ({
+        role: message.role,
+        content: message.content,
+      }),
+    ),
+    stream: true,
   });
 
-   */
-
-  try {
-    const response = await openai.createChatCompletion({
-      model: "gpt-3.5-turbo-16k",
-      messages,
-    });
-
-    if (!response.ok) {
-      return NextResponse.json(
-        {
-          error: response.statusText,
-        },
-        {
-          status: response.status,
-        },
-      );
-    } else {
-      const result = await response.json();
-      return NextResponse.json(JSON.parse(result.choices[0].message.content));
-    }
-  } catch (error) {
-    NextResponse.json({ error }, { status: 500 });
-  }
+  const stream = OpenAIStream(response);
+  return new StreamingTextResponse(stream);
 }
